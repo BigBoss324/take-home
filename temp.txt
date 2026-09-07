@@ -1,0 +1,11 @@
+rut,dv,familia,multi_giro,codigo_ganador,trazabilidad
+2037289,3,contador,True,692000,Regla Prioridad (1)
+4346663,1,contador,True,692000,Regla Prioridad (1)
+4286678,4,contador,True,692000,Regla Prioridad (1)
+4108520,7,pyme,True,11306,Regla Prioridad (2)
+5084436,6,pyme,True,472101,Regla Prioridad (2)
+4596828,6,pyme,True,492300,Regla Prioridad (2)
+5781261,3,pyme,True,181200,Regla Prioridad (2)
+6105425,1,pyme,True,410010,Regla Prioridad (2)
+7683970,0,pyme,True,620200,Regla Prioridad (2)
+3418354,6,otro / sin_clasificar,False,,Ningún giro encontrado en el mapa

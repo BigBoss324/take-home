@@ -1,0 +1,16 @@
+# Entorno virtual
+venv/
+.env
+
+# Archivos compilados en Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Archivos de la IDE y sistema
+.vscode/
+.DS_Store
+
+# (Opcional) Si no quieres subir los resultados para que ellos los generen allá
+# outputs/resultados_exitosos.csv
+# outputs/cuarentena.csv
