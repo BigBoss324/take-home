@@ -13,7 +13,10 @@ __pycache__/
 .DS_Store
 ~$*
 
-# Archivos generados / temporales
-# (Descomentar si no quieres versionar salidas generadas)
-# outputs/resultados_exitosos.csv
-# outputs/cuarentena.csv
+# Datos confidenciales de entrada
+inputs/*.csv
+!inputs/.gitkeep
+
+# Resultados y salidas generadas
+outputs/*.csv
+!outputs/.gitkeep
