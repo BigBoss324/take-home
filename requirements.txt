@@ -3,3 +3,4 @@ playwright
 tqdm
 tenacity
 pytest
+playwright-stealth

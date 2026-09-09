@@ -14,3 +14,6 @@ __pycache__/
 # (Opcional) Si no quieres subir los resultados para que ellos los generen allá
 # outputs/resultados_exitosos.csv
 # outputs/cuarentena.csv
+
+inputs/ruts_entrada.csv
+outputs/*.csv
