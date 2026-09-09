@@ -51,26 +51,50 @@ Si te preguntan por términos específicos durante la entrevista, aquí está el
 
 ---
 
-## 🛠️ Cómo Ejecutar el Proyecto
+## 🛠️ Cómo Configurar y Ejecutar el Proyecto (Setup Rápido)
 
-### Instalación
-```bash
+Sigue estos pasos para levantar el entorno desde cero en cualquier máquina (Windows / PowerShell):
+
+### 1. Clonar el repositorio
+```powershell
+git clone https://github.com/BigBoss324/take-home.git
+cd take-home
+```
+
+### 2. Crear y activar entorno virtual
+```powershell
+python -m venv venv
+.\venv\Scripts\activate
+```
+
+### 3. Instalar dependencias y navegadores
+```powershell
 pip install -r requirements.txt
-pip install playwright-stealth tenacity pytest tqdm
-playwright install chromium msedge
+playwright install msedge chromium
 ```
 
-### Ejecutar el Pipeline (Modo Servidor / Headless)
-```bash
-# PowerShell (Windows)
-$env:MAX_CONCURRENCY="3"; $env:SII_HEADLESS="true"; python main.py
-```
-*Si tu IP fue bloqueada recientemente por el SII, mantén MAX_CONCURRENCY en 3 o menos, o espera 15 minutos.*
+### 4. Cargar datos de prueba
+Coloca tus archivos CSV en la carpeta `inputs/`:
+- `inputs/ruts_entrada.csv` (RUTs a consultar)
+- `inputs/mapa_rubros.csv` (Catálogo de rubros y prioridades)
 
-### Ejecutar las Pruebas Unitarias
-```bash
-python -m pytest tests/ -v
+*(Nota: La carpeta `inputs/` y `outputs/` están protegidas en `.gitignore` para cumplir con las políticas de privacidad y confidencialidad).*
+
+### 5. Ejecutar Pruebas Unitarias (41 tests)
+```powershell
+pytest tests/ -v
 ```
+*(Valida en menos de 1 segundo toda la lógica matemática de RUTs y clasificación multi-giro).*
+
+### 6. Ejecutar el Pipeline
+```powershell
+# Modo headless (óptimo y rápido)
+$env:SII_HEADLESS="true"; python main.py
+
+# O con visualización del navegador:
+$env:SII_HEADLESS="false"; python main.py
+```
+Los resultados se generarán automáticamente en `outputs/resultados_exitosos.csv` y los casos aislados en `outputs/cuarentena.csv`.
 
 ---
 
