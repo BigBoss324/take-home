@@ -20,3 +20,6 @@ inputs/*.csv
 # Resultados y salidas generadas
 outputs/*.csv
 !outputs/.gitkeep
+
+# Playwright user data dirs
+.browser_session*

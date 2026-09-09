@@ -29,37 +29,61 @@ async def obtener_giros_sii(rut_formateado: str) -> list[str]:
     rut_con_puntos = f"{cuerpo_formateado}-{dv}"
     
     async with async_playwright() as p:
-        # Configurable: SII_HEADLESS=true para CI/servidores, false para demo con captcha manual
-        # Usamos channel='msedge' para usar el Edge local de Windows y saltar el error de certificado al descargar Chromium
         browser = await p.chromium.launch(
             headless=os.getenv('SII_HEADLESS', 'false').lower() == 'true',
             channel="msedge"
         )
         context = await browser.new_context(
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            viewport={"width": 1280, "height": 800}
         )
         page = await context.new_page()
         
-        # Ocultar rastro de que somos un robot (WebDriver)
+        # Ocultar rastro de automatización
         await Stealth().apply_stealth_async(page)
         
         try:
-            await page.goto(url, wait_until="commit", timeout=15000)
+            await page.goto(url, wait_until="domcontentloaded", timeout=60000)
             
-            rut_input_selector = "input.rut-form"
-            submit_btn = "input[name='Consultar'], button:has-text('Consultar')"
-            
-            await page.wait_for_selector(rut_input_selector, timeout=10000)
-            
-            # Simulamos el tipeo humano con el formato estricto
-            await page.type(rut_input_selector, rut_con_puntos, delay=100)
-            
-            await page.click(submit_btn)
+            # 1. Bucle robusto para llenar el formulario y lidiar con la Sala de Espera si aparece sorpresivamente
+            intentos_formulario = 0
+            while intentos_formulario < 3:
+                intentos_formulario += 1
+                try:
+                    # Comprobar si nos mandaron a sala de espera al cargar o recargar
+                    if "salaespera.sii.cl" in page.url or await page.locator("text='Pronto será tu turno'").count() > 0:
+                        logger.warning(f"RUT {rut_formateado}: En Sala de Espera SII. Esperando turno pacientemente (hasta 10 min)...")
+                        await page.wait_for_url(re.compile(r"^https://www2\.sii\.cl/.*"), timeout=600000) # 10 mins de tolerancia
+                        logger.info(f"RUT {rut_formateado}: Fin de sala de espera. Procediendo...")
+
+                    # Esperar que la página principal cargue detectando el título oficial
+                    await page.wait_for_selector("text=CONSULTAR SITUACIÓN TRIBUTARIA", timeout=30000)
+                    
+                    # Esperar el campo de RUT y el botón
+                    rut_input = page.locator("input.rut-form").first
+                    await rut_input.wait_for(state="visible", timeout=15000)
+                    submit_btn = page.locator("input[name='Consultar'], input[value='Consultar'], button:has-text('Consultar')").first
+                    
+                    # Limpiamos y tipeamos el RUT
+                    await rut_input.fill("")
+                    await rut_input.type(rut_con_puntos, delay=80)
+                    
+                    # Click en Consultar forzando la acción
+                    await submit_btn.click(timeout=15000, force=True)
+                    break # Si el click es exitoso sin TimeoutError, salimos del bucle
+                    
+                except TimeoutError:
+                    # Si falló por Timeout, verificamos si fue porque Queue-It nos interrumpió en medio de la escritura/click
+                    if "salaespera.sii.cl" in page.url or await page.locator("text='Pronto será tu turno'").count() > 0:
+                        logger.info(f"RUT {rut_formateado}: Interrumpido por Sala de Espera durante el formulario. Reintentando loop...")
+                        continue
+                    else:
+                        raise # Si fue un Timeout real por lentitud y no por Sala de Espera, que actúe Tenacity
             
             # --- ESPERA SEGURA ---
             try:
                 # 100% Cierto: El texto 'RUT Contribuyente:' siempre es un nodo de texto en el resultado del SII.
-                await page.wait_for_selector("text='RUT Contribuyente:'", timeout=10000)
+                await page.wait_for_selector("text='RUT Contribuyente:'", timeout=15000)
             except TimeoutError:
                 # Si falla, es porque apareció CAPTCHA real u otro bloqueo de Angular.
                 await page.wait_for_selector("text='RUT Contribuyente:'", timeout=30000)
