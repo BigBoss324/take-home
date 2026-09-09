@@ -6,11 +6,14 @@ venv/
 __pycache__/
 *.py[cod]
 *$py.class
+.pytest_cache/
 
 # Archivos de la IDE y sistema
 .vscode/
 .DS_Store
+~$*
 
-# (Opcional) Si no quieres subir los resultados para que ellos los generen allá
+# Archivos generados / temporales
+# (Descomentar si no quieres versionar salidas generadas)
 # outputs/resultados_exitosos.csv
 # outputs/cuarentena.csv

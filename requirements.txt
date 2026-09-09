@@ -1,5 +1,7 @@
 pandas
 playwright
+playwright-stealth
 tqdm
 tenacity
 pytest
+python-pptx
